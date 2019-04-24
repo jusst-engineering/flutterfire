@@ -24,6 +24,11 @@ class Crashlytics {
   static const MethodChannel channel =
       MethodChannel('plugins.flutter.io/firebase_crashlytics');
 
+  Future<void> init() async {
+    print('Initializing Crashlytics plugin');
+    await channel.invokeMethod('Crashlytics#init');
+  }
+
   /// Submits report of a non-fatal error caught by the Flutter framework.
   /// to Firebase Crashlytics.
   Future<void> recordFlutterError(FlutterErrorDetails details) async {

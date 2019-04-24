@@ -18,8 +18,6 @@
   FirebaseCrashlyticsPlugin *instance = [[FirebaseCrashlyticsPlugin alloc] init];
   [registrar addMethodCallDelegate:instance channel:channel];
 
-  [Fabric with:@[ [Crashlytics self] ]];
-
   SEL sel = NSSelectorFromString(@"registerLibrary:withVersion:");
   if ([FIRApp respondsToSelector:sel]) {
     [FIRApp performSelector:sel withObject:LIBRARY_NAME withObject:LIBRARY_VERSION];
@@ -37,7 +35,9 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
-  if ([@"Crashlytics#onError" isEqualToString:call.method]) {
+  if ([@"Crashlytics#init" isEqualToString:call.method]) {
+    [Fabric with:@[ [Crashlytics self] ]];
+  } else if ([@"Crashlytics#onError" isEqualToString:call.method]) {
     // Add logs.
     NSArray *logs = call.arguments[@"logs"];
     for (NSString *log in logs) {

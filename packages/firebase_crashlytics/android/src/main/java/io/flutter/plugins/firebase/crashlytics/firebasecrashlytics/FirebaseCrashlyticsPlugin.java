@@ -23,6 +23,7 @@ import java.util.Map;
 public class FirebaseCrashlyticsPlugin implements FlutterPlugin, MethodCallHandler {
   public static final String TAG = "CrashlyticsPlugin";
   private MethodChannel channel;
+  private Context context;
 
   @Override
   public void onAttachedToEngine(FlutterPluginBinding binding) {
@@ -41,11 +42,7 @@ public class FirebaseCrashlyticsPlugin implements FlutterPlugin, MethodCallHandl
   private static MethodChannel setup(BinaryMessenger binaryMessenger, Context context) {
     final MethodChannel channel =
         new MethodChannel(binaryMessenger, "plugins.flutter.io/firebase_crashlytics");
-    channel.setMethodCallHandler(new FirebaseCrashlyticsPlugin());
-
-    if (!Fabric.isInitialized()) {
-      Fabric.with(context, new Crashlytics());
-    }
+    channel.setMethodCallHandler(new FirebaseCrashlyticsPlugin(context));
 
     return channel;
   }
@@ -55,9 +52,17 @@ public class FirebaseCrashlyticsPlugin implements FlutterPlugin, MethodCallHandl
     setup(registrar.messenger(), registrar.context());
   }
 
+  FirebaseCrashlyticsPlugin(Context context) {
+    this.context = context;
+  }
+
   @Override
   public void onMethodCall(MethodCall call, Result result) {
-    if (call.method.equals("Crashlytics#onError")) {
+    if (call.method.equals("Crashlytics#init")) {
+      if (!Fabric.isInitialized()) {
+        Fabric.with(context, new Crashlytics());
+      }
+    } else if (call.method.equals("Crashlytics#onError")) {
       // Add logs.
       List<String> logs = call.argument("logs");
       for (String log : logs) {
